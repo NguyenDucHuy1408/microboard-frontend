@@ -308,9 +308,17 @@ const KanbanView = ({ boardId, onBack }) => {
 // ==========================================
 // 4. MÀN HÌNH DASHBOARD
 // ==========================================
+// ==========================================
+// 4. MÀN HÌNH DASHBOARD
+// ==========================================
 const Dashboard = ({ onSelectBoard }) => {
   const [boards, setBoards] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
+
+  // State cho Modal tạo mới
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newBoardTitle, setNewBoardTitle] = useState('');
+  const [newBoardDesc, setNewBoardDesc] = useState('');
 
   useEffect(() => {
     const fetchBoards = async () => {
@@ -324,40 +332,127 @@ const Dashboard = ({ onSelectBoard }) => {
     fetchBoards();
   }, [messageApi]);
 
+  // HÀM TẠO DỰ ÁN
+  const handleCreateBoard = async () => {
+    if (!newBoardTitle.trim()) return messageApi.warning('Vui lòng nhập tên dự án!');
+    try {
+      const response = await fetch('https://microboard-api.onrender.com/api/boards', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getToken()}` 
+        },
+        body: JSON.stringify({ title: newBoardTitle, description: newBoardDesc })
+      });
+      if (response.ok) {
+        const newBoard = await response.json();
+        setBoards([...boards, newBoard]);
+        setIsModalVisible(false);
+        setNewBoardTitle('');
+        setNewBoardDesc('');
+        messageApi.success('Tạo dự án thành công!');
+      }
+    } catch (error) { messageApi.error('Lỗi khi tạo dự án!'); }
+  };
+
+  // HÀM XÓA DỰ ÁN
+  const handleDeleteBoard = async (e, id) => {
+    e.stopPropagation(); // Ngăn click nhầm vào Card để mở dự án
+    try {
+      const response = await fetch(`https://microboard-api.onrender.com/api/boards/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      if (response.ok) {
+        setBoards(boards.filter(b => b.id !== id));
+        messageApi.success('Đã xóa dự án!');
+      } else {
+        messageApi.error('Xóa thất bại!');
+      }
+    } catch (error) { messageApi.error('Lỗi kết nối khi xóa!'); }
+  };
+
   return (
     <div>
       {contextHolder}
-      <Title level={3} style={{ textAlign: 'center', marginBottom: '30px' }}>
-        Danh sách Dự án của bạn
-      </Title>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '30px', gap: '20px' }}>
+         <Title level={3} style={{ margin: 0 }}>Danh sách Dự án của bạn</Title>
+         <Button type="primary" onClick={() => setIsModalVisible(true)}>+ Tạo Dự Án Mới</Button>
+      </div>
+      
       <Row gutter={[16, 16]}>
         {boards.map(board => (
           <Col span={8} key={board.id}>
-            <Card hoverable onClick={() => onSelectBoard(board.id)} style={{ textAlign: 'center', borderColor: '#1890ff', borderWidth: '2px' }}>
+            <Card 
+              hoverable 
+              onClick={() => onSelectBoard(board.id)} 
+              style={{ textAlign: 'center', borderColor: '#1890ff', borderWidth: '2px', position: 'relative' }}
+            >
+              {/* NÚT XÓA DỰ ÁN */}
+              <Popconfirm
+                title="Xóa dự án này và toàn bộ thẻ bên trong?"
+                onConfirm={(e) => handleDeleteBoard(e, board.id)}
+                onCancel={(e) => e.stopPropagation()}
+                okText="Xóa"
+                cancelText="Hủy"
+              >
+                <Button 
+                  danger 
+                  size="small" 
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ position: 'absolute', top: 10, right: 10 }}
+                >
+                  Xóa
+                </Button>
+              </Popconfirm>
+
               <FolderOpenOutlined style={{ fontSize: '40px', color: '#1890ff', marginBottom: '10px' }} />
               <Title level={4}>{board.title}</Title>
               <Text type="secondary">{board.description || 'Không có mô tả'}</Text>
             </Card>
           </Col>
         ))}
+        
+        {/* CARD NÉT ĐỨT ĐỂ TẠO MỚI (Tùy chọn phụ) */}
+        <Col span={8}>
+          <Card 
+            hoverable 
+            onClick={() => setIsModalVisible(true)} 
+            style={{ textAlign: 'center', borderStyle: 'dashed', borderWidth: '2px', backgroundColor: '#fafafa', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+          >
+            <Title level={4} style={{ color: '#8c8c8c' }}>+ Thêm Dự Án Mới</Title>
+          </Card>
+        </Col>
       </Row>
-    </div>
-  );
-};
 
-// ==========================================
-// 5. MAIN APP
-// ==========================================
-export default function App() {
-  const [currentBoardId, setCurrentBoardId] = useState(null);
-
-  return (
-    <div style={{ padding: '20px' }}>
-      {currentBoardId ? (
-        <KanbanView boardId={currentBoardId} onBack={() => setCurrentBoardId(null)} />
-      ) : (
-        <Dashboard onSelectBoard={setCurrentBoardId} />
-      )}
+      {/* MODAL NHẬP THÔNG TIN TẠO MỚI */}
+      <Modal
+        title="Tạo Dự Án Mới"
+        open={isModalVisible}
+        onOk={handleCreateBoard}
+        onCancel={() => setIsModalVisible(false)}
+        okText="Tạo mới"
+        cancelText="Hủy"
+      >
+        <div style={{ marginBottom: '15px' }}>
+          <Text strong>Tên dự án <span style={{ color: 'red' }}>*</span>:</Text>
+          <Input 
+            placeholder="VD: Đồ án môn học..." 
+            value={newBoardTitle} 
+            onChange={(e) => setNewBoardTitle(e.target.value)} 
+            style={{ marginTop: '5px' }} 
+          />
+        </div>
+        <div>
+          <Text strong>Mô tả ngắn:</Text>
+          <Input.TextArea 
+            placeholder="Mục tiêu dự án..." 
+            value={newBoardDesc} 
+            onChange={(e) => setNewBoardDesc(e.target.value)} 
+            style={{ marginTop: '5px' }} 
+          />
+        </div>
+      </Modal>
     </div>
   );
 }
