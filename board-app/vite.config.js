@@ -11,7 +11,7 @@ export default defineConfig({
       exposes: {
         './Board': './src/App.jsx'
       },
-      shared: ['react', 'react-dom']
+      shared: ['react', 'react-dom', 'antd']
     })
   ],
   server: { port: 3002, strictPort: true },

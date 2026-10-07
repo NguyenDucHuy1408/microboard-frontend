@@ -11,7 +11,7 @@ export default defineConfig({
       exposes: {
         './Auth': './src/App.jsx'
       },
-      shared: ['react', 'react-dom']
+      shared: ['react', 'react-dom', 'antd']
     })
   ],
   server: { port: 3001, strictPort: true },

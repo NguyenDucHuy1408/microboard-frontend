@@ -11,7 +11,7 @@ export default defineConfig({
         authApp: 'https://microboard-auth.vercel.app/assets/remoteEntry.js',
         boardApp: 'https://microboard-board.vercel.app/assets/remoteEntry.js',
       },
-      shared: ['react', 'react-dom']
+      shared: ['react', 'react-dom', 'antd']
     })
   ],
   server: { port: 3000, strictPort: true },
