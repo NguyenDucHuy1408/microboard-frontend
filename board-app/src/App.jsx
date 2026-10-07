@@ -308,9 +308,6 @@ const KanbanView = ({ boardId, onBack }) => {
 // ==========================================
 // 4. MÀN HÌNH DASHBOARD
 // ==========================================
-// ==========================================
-// 4. MÀN HÌNH DASHBOARD
-// ==========================================
 const Dashboard = ({ onSelectBoard }) => {
   const [boards, setBoards] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
@@ -453,6 +450,23 @@ const Dashboard = ({ onSelectBoard }) => {
           />
         </div>
       </Modal>
+    </div>
+  );
+};
+
+// ==========================================
+// 5. MAIN APP
+// ==========================================
+export default function App() {
+  const [currentBoardId, setCurrentBoardId] = useState(null);
+
+  return (
+    <div style={{ padding: '20px' }}>
+      {currentBoardId ? (
+        <KanbanView boardId={currentBoardId} onBack={() => setCurrentBoardId(null)} />
+      ) : (
+        <Dashboard onSelectBoard={setCurrentBoardId} />
+      )}
     </div>
   );
 }
