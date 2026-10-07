@@ -8,8 +8,8 @@ export default defineConfig({
     federation({
       name: 'host_app',
       remotes: {
-        authApp: 'http://localhost:3001/assets/remoteEntry.js',
-        boardApp: 'http://localhost:3002/assets/remoteEntry.js'
+        authApp: 'https://microboard-auth.vercel.app/assets/remoteEntry.js',
+        boardApp: 'https://microboard-board.vercel.app/assets/remoteEntry.js',
       },
       shared: ['react', 'react-dom']
     })
