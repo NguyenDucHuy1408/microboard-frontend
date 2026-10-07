@@ -24,6 +24,7 @@ function App({ onLoginSuccess }) {
 
       if (response.ok) {
         messageApi.success('Đăng nhập thành công!');
+        localStorage.setItem('token', data.token);
         if (onLoginSuccess) {
             onLoginSuccess(data.token);
         } else {
