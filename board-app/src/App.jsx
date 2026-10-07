@@ -348,8 +348,12 @@ const Dashboard = ({ onSelectBoard }) => {
         setNewBoardTitle('');
         setNewBoardDesc('');
         messageApi.success('Tạo dự án thành công!');
+      } else {
+        // ĐOẠN MỚI THÊM: Hiện thẳng lỗi từ Backend lên màn hình
+        const errorText = await response.text();
+        messageApi.error('Máy chủ từ chối: ' + errorText);
       }
-    } catch (error) { messageApi.error('Lỗi khi tạo dự án!'); }
+    } catch (error) { messageApi.error('Lỗi kết nối!'); }
   };
 
   // HÀM XÓA DỰ ÁN
