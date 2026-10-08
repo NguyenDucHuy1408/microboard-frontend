@@ -6,10 +6,16 @@ const { Title } = Typography;
 
 function App({ onLoginSuccess }) {
   const [messageApi, contextHolder] = message.useMessage();
-  const [isLogin, setIsLogin] = useState(true); // Trạng thái chuyển đổi Đăng nhập / Đăng ký
+  const [isLogin, setIsLogin] = useState(true); 
 
-  // Hàm xử lý Đăng nhập (giữ nguyên logic cũ của bạn)
+  // ĐÃ SỬA CHỮA: Đưa biến trạng thái vào bên trong Component
+  const [isLoading, setIsLoading] = useState(false);
+
+  // ==========================================
+  // HÀM XỬ LÝ ĐĂNG NHẬP
+  // ==========================================
   const onLoginFinish = async (values) => {
+    setIsLoading(true); // Bật loading
     try {
       const response = await fetch('https://microboard-api.onrender.com/api/users/login', {
         method: 'POST',
@@ -37,17 +43,22 @@ function App({ onLoginSuccess }) {
     } catch (error) {
       console.error('Lỗi kết nối:', error);
       messageApi.error('Không thể kết nối đến máy chủ Backend!');
+    } finally {
+      setIsLoading(false); // Tắt loading
     }
   };
 
-  // Hàm xử lý Đăng ký mới thêm
+  // ==========================================
+  // HÀM XỬ LÝ ĐĂNG KÝ
+  // ==========================================
   const onRegisterFinish = async (values) => {
+    setIsLoading(true); // Bật loading cả cho Đăng ký
     try {
       const response = await fetch('https://microboard-api.onrender.com/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullName: values.fullName, // Trường bắt buộc để không bị lỗi 500
+          fullName: values.fullName, 
           email: values.email,
           passwordHash: values.password 
         }),
@@ -62,6 +73,8 @@ function App({ onLoginSuccess }) {
     } catch (error) {
       console.error('Lỗi kết nối:', error);
       messageApi.error('Không thể kết nối đến máy chủ Backend!');
+    } finally {
+      setIsLoading(false); // Tắt loading
     }
   };
 
@@ -94,8 +107,8 @@ function App({ onLoginSuccess }) {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" block>
-                Đăng Nhập
+              <Button type="primary" htmlType="submit" block loading={isLoading}>
+                  {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </Button>
             </Form.Item>
           </Form>
@@ -127,8 +140,9 @@ function App({ onLoginSuccess }) {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" block style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}>
-                Đăng Ký
+              {/* ĐÃ SỬA CHỮA: Thêm thuộc tính loading vào nút Đăng ký */}
+              <Button type="primary" htmlType="submit" block loading={isLoading} style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}>
+                {isLoading ? 'Đang xử lý...' : 'Đăng Ký'}
               </Button>
             </Form.Item>
           </Form>
@@ -136,7 +150,7 @@ function App({ onLoginSuccess }) {
 
         {/* ================= NÚT CHUYỂN ĐỔI ================= */}
         <div style={{ textAlign: 'center', marginTop: 16 }}>
-          <Button type="link" onClick={() => setIsLogin(!isLogin)}>
+          <Button type="link" onClick={() => setIsLogin(!isLogin)} disabled={isLoading}>
             {isLogin ? 'Chưa có tài khoản? Đăng ký ngay' : 'Đã có tài khoản? Đăng nhập'}
           </Button>
         </div>

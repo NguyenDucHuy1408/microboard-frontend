@@ -11,9 +11,6 @@ const getToken = () => localStorage.getItem('token');
 // ==========================================
 // 1. COMPONENT THẺ CÔNG VIỆC
 // ==========================================
-// ==========================================
-// 1. COMPONENT THẺ CÔNG VIỆC
-// ==========================================
 const TaskCard = ({ task, onDelete, onDoubleClick }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: task.id.toString() });
   const style = {
